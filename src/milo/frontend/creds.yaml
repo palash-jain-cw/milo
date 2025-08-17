@@ -1,0 +1,17 @@
+cookie:
+  expiry_days: 0
+  key: streamlit-auth-test-app-key
+  name: streamlit-auth-test-app
+credentials:
+  usernames:
+    palash:
+      email: palash@example.com
+      failed_login_attempts: 0
+      first_name: Palash
+      last_name: Jain
+      logged_in: false
+      password: password
+      roles:
+        - admin
+        - editor
+        - viewer
