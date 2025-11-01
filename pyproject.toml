@@ -7,7 +7,22 @@ authors = [
     { name = "Palash Jain", email = "palash.jain.cw@gmail.com" }
 ]
 requires-python = ">=3.11"
-dependencies = []
+dependencies = [
+    "fastapi>=0.120.2",
+    "ipykernel>=7.1.0",
+    "loguru>=0.7.3",
+    "openai>=2.6.1",
+    "pydantic-ai>=1.9.1",
+    "pydantic>=2.12.3",
+    "pydantic-settings>=2.11.0",
+    "python-dotenv>=1.2.1",
+    "ruff>=0.14.2",
+    "sqlmodel>=0.0.27",
+    "uvicorn[standard]>=0.38.0",
+    "streamlit>=1.51.0",
+    "httpx>=0.28.1",
+    "python-multipart>=0.0.20",
+]
 
 [project.scripts]
 milo = "milo:main"
