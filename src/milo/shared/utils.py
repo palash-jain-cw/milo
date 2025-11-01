@@ -2,12 +2,12 @@ import json
 from pydantic import BaseModel
 from pydantic import ValidationError
 import traceback
-from logging import getLogger
 from typing import List
 from milo.shared.json_generator import jsonify
 from datetime import datetime, date
+from milo.core.logger.logger_setup import loguru_setup
 
-logger = getLogger(__name__)
+logger = loguru_setup()
 
 
 def attach_output_schema_to_prompt(prompt: str, output_schema: type[BaseModel]) -> str:

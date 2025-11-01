@@ -1,12 +1,12 @@
 """Tool execution logic for task operations."""
 
-import logging
 import traceback
 from typing import Dict, Any
 
 from milo.tasks.service import TaskService
+from milo.core.logger.logger_setup import loguru_setup
 
-logger = logging.getLogger(__name__)
+logger = loguru_setup()
 
 
 def execute_tool_call(

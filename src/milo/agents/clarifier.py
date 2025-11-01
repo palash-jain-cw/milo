@@ -1,6 +1,5 @@
 """Clarifier agent for handling ambiguous user messages."""
 
-import logging
 import traceback
 from typing import List, Tuple, Dict
 from openai import OpenAI
@@ -13,8 +12,9 @@ from milo.shared.utils import (
     validate_and_load_structured_output,
 )
 from milo.core.config import settings
+from milo.core.logger.logger_setup import loguru_setup
 
-logger = logging.getLogger(__name__)
+logger = loguru_setup()
 
 
 clarifier_instructions = """

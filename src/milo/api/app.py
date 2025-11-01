@@ -1,6 +1,5 @@
 """FastAPI application for Milo task manager."""
 
-import logging
 import traceback
 from contextlib import asynccontextmanager
 from typing import List
@@ -22,8 +21,9 @@ from milo.tasks.service import TaskService
 from milo.shared.database import init_db
 from milo.shared.json_generator import jsonify
 from milo.core.config import settings
+from milo.core.logger.logger_setup import loguru_setup
 
-logger = logging.getLogger(__name__)
+logger = loguru_setup()
 
 # Global instances
 task_service: TaskService = None

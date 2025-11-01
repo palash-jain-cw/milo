@@ -1,6 +1,5 @@
 """Task agent for executing task-related operations via function calling."""
 
-import logging
 import traceback
 import json
 from typing import List, Dict, Optional
@@ -15,8 +14,9 @@ from milo.shared.utils import (
 )
 from milo.shared.json_generator import jsonify
 from milo.core.config import settings
+from milo.core.logger.logger_setup import loguru_setup
 
-logger = logging.getLogger(__name__)
+logger = loguru_setup()
 
 
 task_agent_instructions = """

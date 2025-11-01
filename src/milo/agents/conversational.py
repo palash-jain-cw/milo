@@ -1,12 +1,12 @@
 """Conversational handler for social/emotional messages."""
 
-import logging
 import traceback
 from openai import OpenAI
 
 from milo.core.config import settings
+from milo.core.logger.logger_setup import loguru_setup
 
-logger = logging.getLogger(__name__)
+logger = loguru_setup()
 
 
 conversational_instructions = """

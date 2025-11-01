@@ -1,6 +1,5 @@
 """Main orchestrator that routes user messages through appropriate agents."""
 
-import logging
 import traceback
 from typing import List, Dict, Optional
 from openai import OpenAI
@@ -11,8 +10,9 @@ from milo.agents.conversational import handle_conversational
 from milo.agents.task_agent import handle_task_agent
 from milo.tasks.service import TaskService
 from milo.core.config import settings
+from milo.core.logger.logger_setup import loguru_setup
 
-logger = logging.getLogger(__name__)
+logger = loguru_setup()
 
 
 def run_task_manager(

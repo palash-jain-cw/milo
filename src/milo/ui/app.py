@@ -4,6 +4,10 @@ import streamlit as st
 import httpx
 from datetime import datetime
 from typing import List, Dict
+from milo.core.logger.logger_setup import loguru_setup
+
+# Initialize logger
+logger = loguru_setup()
 
 # Configuration
 API_BASE_URL = "http://localhost:8000"
@@ -72,6 +76,7 @@ if "awaiting_clarification" not in st.session_state:
 def call_api(endpoint: str, method: str = "GET", data: dict = None) -> dict:
     """Call the FastAPI backend."""
     url = f"{API_BASE_URL}{endpoint}"
+    logger.info(f"API call: {method} {url}")
 
     try:
         if method == "GET":
@@ -84,12 +89,18 @@ def call_api(endpoint: str, method: str = "GET", data: dict = None) -> dict:
             raise ValueError(f"Unsupported method: {method}")
 
         response.raise_for_status()
-        return response.json()
+        result = response.json()
+        logger.info(
+            f"API response received: {method} {url} - Status: {response.status_code}"
+        )
+        return result
 
     except httpx.HTTPError as e:
+        logger.error(f"HTTP error calling {url}: {str(e)}")
         st.error(f"API Error: {str(e)}")
         return None
     except Exception as e:
+        logger.error(f"Error calling {url}: {str(e)}")
         st.error(f"Error: {str(e)}")
         return None
 
@@ -97,6 +108,9 @@ def call_api(endpoint: str, method: str = "GET", data: dict = None) -> dict:
 def send_message(message: str, is_clarification: bool = False):
     """Send a message to the chat API."""
     endpoint = "/chat/clarify" if is_clarification else "/chat"
+    logger.info(
+        f"Sending message (clarification={is_clarification}): {message[:100]}..."
+    )
 
     data = {
         "message": message,
@@ -106,6 +120,9 @@ def send_message(message: str, is_clarification: bool = False):
     response = call_api(endpoint, method="POST", data=data)
 
     if response:
+        logger.info(
+            f"Received response, needs_clarification={response.get('needs_user_input', False)}"
+        )
         # Update conversation history
         st.session_state.conversation_history = response["conversation_history"]
 
@@ -121,11 +138,15 @@ def send_message(message: str, is_clarification: bool = False):
         )
 
         return response
+    logger.warning("No response received from API")
     return None
 
 
 def get_tasks(status: str = None, priority: str = None) -> List[Dict]:
     """Get tasks from the API."""
+    logger.debug(
+        f"Fetching tasks with filters - status: {status}, priority: {priority}"
+    )
     params = []
     if status:
         params.append(f"status={status}")
@@ -184,6 +205,8 @@ def format_task_card(task: Dict):
 
 # Main UI
 def main():
+    logger.info("Streamlit app started")
+
     # Header
     st.markdown('<div class="main-header">🤖 Milo</div>', unsafe_allow_html=True)
     st.markdown(
@@ -254,6 +277,7 @@ def main():
             st.rerun()
 
         if st.button("🔄 Clear Chat", use_container_width=True):
+            logger.info("Clearing chat history")
             st.session_state.messages = []
             st.session_state.conversation_history = []
             st.session_state.awaiting_clarification = False
@@ -289,6 +313,7 @@ def main():
 
         # Chat input using Streamlit's native chat input (stays at bottom)
         if prompt := st.chat_input("Type your message here...", key="chat_input"):
+            logger.info(f"User input received: {prompt[:100]}...")
             # Send the message
             send_message(
                 prompt, is_clarification=st.session_state.awaiting_clarification

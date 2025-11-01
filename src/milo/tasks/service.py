@@ -1,12 +1,14 @@
 from typing import List, Optional
 from datetime import datetime, date
-import logging
 import traceback
 
 from sqlmodel import select
 
 from milo.tasks.models import Task, TaskStatus, TaskPriority
 from milo.shared.database import get_session
+from milo.core.logger.logger_setup import loguru_setup
+
+logger = loguru_setup()
 
 
 class TaskService:
@@ -40,14 +42,11 @@ class TaskService:
                 session.add(task)
                 session.flush()  # ensures task.id is assigned before commit
                 session.refresh(task)
-                logging.info("Created task '%s' with id %s", task.title, task.id)
+                logger.info(f"Created task '{task.title}' with id {task.id}")
                 return task
         except Exception as exc:
-            logging.error(
-                "Failed to create task '%s': %s\n%s",
-                title,
-                exc,
-                traceback.format_exc(),
+            logger.error(
+                f"Failed to create task '{title}': {exc}\n{traceback.format_exc()}"
             )
             raise
 
@@ -60,16 +59,13 @@ class TaskService:
             with get_session() as session:
                 task = session.get(Task, task_id)
                 if task:
-                    logging.info("Retrieved task with id %s", task_id)
+                    logger.info(f"Retrieved task with id {task_id}")
                 else:
-                    logging.warning("Task with id %s not found", task_id)
+                    logger.warning(f"Task with id {task_id} not found")
                 return task
         except Exception as exc:
-            logging.error(
-                "Failed to retrieve task '%s': %s\n%s",
-                task_id,
-                exc,
-                traceback.format_exc(),
+            logger.error(
+                f"Failed to retrieve task '{task_id}': {exc}\n{traceback.format_exc()}"
             )
             raise
 
@@ -89,14 +85,10 @@ class TaskService:
                     priority_enum = TaskService._parse_priority(priority)
                     query = query.where(Task.priority == priority_enum)
                 tasks = session.exec(query.limit(limit)).all()
-                logging.info("Retrieved %s tasks", len(tasks))
+                logger.info(f"Retrieved {len(tasks)} tasks")
                 return tasks
         except Exception as exc:
-            logging.error(
-                "Failed to list tasks: %s\n%s",
-                exc,
-                traceback.format_exc(),
-            )
+            logger.error(f"Failed to list tasks: {exc}\n{traceback.format_exc()}")
             raise
 
     @staticmethod
@@ -106,14 +98,10 @@ class TaskService:
                 tasks = session.exec(
                     select(Task).order_by(Task.created_at.desc())
                 ).all()
-                logging.info("Retrieved all tasks count=%s", len(tasks))
+                logger.info(f"Retrieved all tasks count={len(tasks)}")
                 return tasks
         except Exception as exc:
-            logging.error(
-                "Failed to list all tasks: %s\n%s",
-                exc,
-                traceback.format_exc(),
-            )
+            logger.error(f"Failed to list all tasks: {exc}\n{traceback.format_exc()}")
             raise
 
     # -----------------------------
@@ -132,7 +120,7 @@ class TaskService:
             with get_session() as session:
                 task = session.get(Task, task_id)
                 if not task:
-                    logging.warning("Task with id %s not found for update", task_id)
+                    logger.warning(f"Task with id {task_id} not found for update")
                     return None
 
                 if title:
@@ -150,14 +138,11 @@ class TaskService:
                 session.add(task)
                 session.flush()
                 session.refresh(task)
-                logging.info("Updated task with id %s", task_id)
+                logger.info(f"Updated task with id {task_id}")
                 return task
         except Exception as exc:
-            logging.error(
-                "Failed to update task '%s': %s\n%s",
-                task_id,
-                exc,
-                traceback.format_exc(),
+            logger.error(
+                f"Failed to update task '{task_id}': {exc}\n{traceback.format_exc()}"
             )
             raise
 
@@ -170,17 +155,14 @@ class TaskService:
             with get_session() as session:
                 task = session.get(Task, task_id)
                 if not task:
-                    logging.warning("Task with id %s not found for deletion", task_id)
+                    logger.warning(f"Task with id {task_id} not found for deletion")
                     return False
                 session.delete(task)
-                logging.info("Deleted task with id %s", task_id)
+                logger.info(f"Deleted task with id {task_id}")
                 return True
         except Exception as exc:
-            logging.error(
-                "Failed to delete task '%s': %s\n%s",
-                task_id,
-                exc,
-                traceback.format_exc(),
+            logger.error(
+                f"Failed to delete task '{task_id}': {exc}\n{traceback.format_exc()}"
             )
             raise
 
@@ -193,21 +175,18 @@ class TaskService:
             with get_session() as session:
                 task = session.get(Task, task_id)
                 if not task:
-                    logging.warning("Task with id %s not found for completion", task_id)
+                    logger.warning(f"Task with id {task_id} not found for completion")
                     return None
                 task.status = TaskStatus.completed
                 task.updated_at = datetime.now()
                 session.add(task)
                 session.flush()
                 session.refresh(task)
-                logging.info("Marked task %s as completed", task_id)
+                logger.info(f"Marked task {task_id} as completed")
                 return task
         except Exception as exc:
-            logging.error(
-                "Failed to mark task '%s' as complete: %s\n%s",
-                task_id,
-                exc,
-                traceback.format_exc(),
+            logger.error(
+                f"Failed to mark task '{task_id}' as complete: {exc}\n{traceback.format_exc()}"
             )
             raise
 
@@ -224,14 +203,10 @@ class TaskService:
         try:
             with get_session() as session:
                 session.exec("DELETE FROM tasks")
-                logging.info("Deleted all tasks")
+                logger.info("Deleted all tasks")
                 return True
         except Exception as exc:
-            logging.error(
-                "Failed to delete all tasks: %s\n%s",
-                exc,
-                traceback.format_exc(),
-            )
+            logger.error(f"Failed to delete all tasks: {exc}\n{traceback.format_exc()}")
             raise
 
     # -----------------------------
@@ -247,12 +222,7 @@ class TaskService:
         try:
             return TaskStatus(status.lower())
         except ValueError as exc:
-            logging.error(
-                "Invalid status '%s': %s\n%s",
-                status,
-                exc,
-                traceback.format_exc(),
-            )
+            logger.error(f"Invalid status '{status}': {exc}\n{traceback.format_exc()}")
             raise
 
     @staticmethod
@@ -264,11 +234,8 @@ class TaskService:
         try:
             return TaskPriority(priority.lower())
         except ValueError as exc:
-            logging.error(
-                "Invalid priority '%s': %s\n%s",
-                priority,
-                exc,
-                traceback.format_exc(),
+            logger.error(
+                f"Invalid priority '{priority}': {exc}\n{traceback.format_exc()}"
             )
             raise
 
@@ -281,11 +248,8 @@ class TaskService:
         try:
             return date.fromisoformat(due_date)
         except ValueError as exc:
-            logging.error(
-                "Invalid due_date '%s': %s\n%s",
-                due_date,
-                exc,
-                traceback.format_exc(),
+            logger.error(
+                f"Invalid due_date '{due_date}': {exc}\n{traceback.format_exc()}"
             )
             raise
 

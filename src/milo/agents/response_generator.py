@@ -1,6 +1,5 @@
 """Response generator for creating natural conversational responses from tool results."""
 
-import logging
 import traceback
 import json
 from typing import List, Dict
@@ -8,8 +7,9 @@ from openai import OpenAI
 
 from milo.shared.json_generator import jsonify
 from milo.core.config import settings
+from milo.core.logger.logger_setup import loguru_setup
 
-logger = logging.getLogger(__name__)
+logger = loguru_setup()
 
 
 def generate_conversational_response(

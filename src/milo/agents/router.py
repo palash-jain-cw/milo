@@ -1,6 +1,5 @@
 """Router agent for intent classification and message routing."""
 
-import logging
 import traceback
 from typing import List
 from openai import OpenAI
@@ -12,8 +11,9 @@ from milo.shared.utils import (
     validate_and_load_structured_output,
 )
 from milo.core.config import settings
+from milo.core.logger.logger_setup import loguru_setup
 
-logger = logging.getLogger(__name__)
+logger = loguru_setup()
 
 
 router_instructions = """

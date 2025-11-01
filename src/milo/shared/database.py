@@ -2,6 +2,9 @@ from contextlib import contextmanager
 from sqlmodel import SQLModel, create_engine, Session
 from milo.core.config import settings
 from milo.tasks.models import Task
+from milo.core.logger.logger_setup import loguru_setup
+
+logger = loguru_setup()
 
 # -------------------------------------------------------------------
 # DATABASE CONFIGURATION
@@ -21,8 +24,10 @@ def init_db():
     Create all tables defined in SQLModel metadata.
     Should be called once at app startup.
     """
+    logger.info(f"Initializing database at {DATABASE_URL}")
     SQLModel.metadata.drop_all(engine)
     SQLModel.metadata.create_all(engine)
+    logger.info("Database initialized successfully")
 
 
 # -------------------------------------------------------------------
