@@ -1,2 +1,5 @@
-def main() -> None:
-    print("Hello from milo!")
+"""Main package initialization."""
+
+from .core.config import settings
+
+__all__ = ["settings"]
